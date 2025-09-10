@@ -1,8 +1,6 @@
-import tkinter as tk
-from tkinter import messagebox
+import flet as ft
 
-# OBSERVER
-
+# --- OBSERVER ---
 class Observer:
     def actualizar(self, message):
         pass
@@ -18,8 +16,7 @@ class ProductSubject:
         for observer in self._observers:
             observer.actualizar(message)
 
-# DECORATOR
-
+# --- DECORATOR ---
 class Product:
     def __init__(self, name, precio):
         self.name = name
@@ -41,93 +38,107 @@ class ProductDecorator(Product):
     def get_descripcion(self):
         return self._product.get_descripcion()
 
-
 class DescuentoDecorator(ProductDecorator):
-    def __init__(self, product, Descuento):
+    def __init__(self, product, descuento):
         super().__init__(product)
-        self.Descuento = Descuento
+        self.descuento = descuento
 
     def get_precio(self):
-        return self._product.get_precio() * (1 - self.Descuento)
+        return self._product.get_precio() * (1 - self.descuento)
 
     def get_descripcion(self):
-        return f"{self._product.get_descripcion()} (Descuento {int(self.Descuento*100)}%)"
-
+        return f"{self._product.get_descripcion()} (Descuento {int(self.descuento*100)}%)"
 
 class EnvioDecorator(ProductDecorator):
     def get_precio(self):
-        return self._product.get_precio() + 20000  
+        return self._product.get_precio() + 20000
 
     def get_descripcion(self):
-        return f"{self._product.get_descripcion()} + costo adicional"
+        return f"{self._product.get_descripcion()} + envío extra"
 
-# Interfaz
+# --- FLET APP ---
+def main(page: ft.Page):
+    page.title = "Detalle de Producto"
+    page.bgcolor = "#f9f9f9"
+    page.window_width = 500
+    page.window_height = 500
 
-class ProductApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Detalle de Producto")
-        self.root.geometry("500x400")
-        self.root.configure(bg="white")
+    product = Product("Nombre del producto", 60000) #color=ft.colors.WHITE
+    subject = ProductSubject()
 
-        
-        self.product = Product("Nombre del producto", 60000)
-        self.subject = ProductSubject()
+    # UI Elements
+    image_box = ft.Container(
+        content=ft.Text("IMAGEN", color="gray", weight="bold", size=12),
+        width=140,
+        height=140,
+        alignment=ft.alignment.center,
+        border=ft.border.all(1, "black"),
+        bgcolor="white",
+    )
 
-        
-        self.image_frame = tk.Frame(root, width=100, height=100, bg="white", relief="solid", borderwidth=1)
-        self.image_frame.pack(pady=10)
+    name_text = ft.Text(product.get_descripcion(), size=20, weight="bold", color="white")
+    precio_text = ft.Text(f"${product.get_precio():,.0f}", size=18, color="green")
 
-        self.image_label = tk.Label(self.image_frame, text="IMAGEN", bg="white", fg="gray", font=("Arial", 9, "bold"))
-        self.image_label.place(relx=0.5, rely=0.5, anchor="center")
+    descuento_checkbox = ft.Checkbox(label="Aplicar cupón 20% descuento")
+    envio_checkbox = ft.Checkbox(label="Aplicar envío ultra rápido (+20.000$)")
 
-        
-        self.name_label = tk.Label(root, text=self.product.get_descripcion(),
-                                   font=("Arial", 16, "bold"), bg="white")
-        self.name_label.pack(pady=10)
+    mensajes = ft.Column([], spacing=5, scroll="auto")
 
-        
-        self.precio_var = tk.StringVar(value=f"${self.product.get_precio():,.0f}")
-        self.precio_label = tk.Label(root, textvariable=self.precio_var,
-                                    font=("Arial", 14), fg="green", bg="white")
-        self.precio_label.pack(pady=5)
+    # --- Functions ---
+    def actualizar_precio(e):
+        nonlocal product
+        decorated_product = product
+        if descuento_checkbox.value:
+            decorated_product = DescuentoDecorator(decorated_product, 0.2)
+        if envio_checkbox.value:
+            decorated_product = EnvioDecorator(decorated_product)
 
-        
-        self.Descuento_var = tk.BooleanVar()
-        self.gift_var = tk.BooleanVar()
+        name_text.value = decorated_product.get_descripcion()
+        precio_text.value = f"${decorated_product.get_precio():,.0f}"
+        page.update()
 
-        tk.Checkbutton(root, text="Aplicar cupon 20% descuento",
-                       variable=self.Descuento_var, bg="white").pack(anchor="w", padx=20)
-        tk.Checkbutton(root, text="Aplicar Envio ultra rapido (+20.000$)",
-                       variable=self.gift_var, bg="white").pack(anchor="w", padx=20)
+    def al_carrito(e):
+        mensaje = f"'{product.get_descripcion()}' añadido al carrito"
+        mensajes.controls.append(ft.Text(mensaje, color="blue"))
+        page.update()
 
-        
-        tk.Button(root, text="Actualizar precio",
-                  command=self.actualizar_precio, bg="blue", fg="white").pack(pady=10)
-
-        
-        tk.Button(root, text="Añadir al carrito",
-                  command=self.al_carrito, bg="black", fg="white").pack(pady=10)
-
-    
-    def actualizar_precio(self):
-        product = self.product
-        if self.Descuento_var.get():
-            product = DescuentoDecorator(product, 0.2)
-        if self.gift_var.get():
-            product = EnvioDecorator(product)
-
-        new_precio = product.get_precio()
-        self.precio_var.set(f"${new_precio:.2f}")
-        self.name_label.config(text=product.get_descripcion())
-
-    
-    def al_carrito(self):
-        self.subject.notify(f"El producto '{self.product.get_descripcion()}' fue añadido al carrito")
-        messagebox.showinfo("Carrito", "Producto añadido al carrito")
-
+    # --- Layout ---
+    page.add(
+        ft.Column(
+            [
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column(
+                            [
+                                image_box,
+                                name_text,
+                                precio_text,
+                                ft.Divider(),
+                                descuento_checkbox,
+                                envio_checkbox,
+                                ft.Row(
+                                    [
+                                        ft.ElevatedButton("Actualizar precio", on_click=actualizar_precio, bgcolor="blue", color="white"),
+                                        ft.ElevatedButton("Añadir al carrito", on_click=al_carrito, bgcolor="black", color="white"),
+                                    ],
+                                    alignment="center",
+                                    spacing=20,
+                                )
+                            ],
+                            horizontal_alignment="center",
+                            spacing=10,
+                        ),
+                        padding=20,
+                    ),
+                ),
+                ft.Text("Eventos:", size=16, weight="bold"),
+                mensajes
+            ],
+            horizontal_alignment="center",
+            spacing=15,
+            expand=True
+        )
+    )
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = ProductApp(root)
-    root.mainloop()
+    ft.app(target=main)

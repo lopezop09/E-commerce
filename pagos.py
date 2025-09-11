@@ -1,85 +1,88 @@
-import tkinter as tk
-from tkinter import messagebox
+import flet as ft
 
-class PaymentGatewayApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Pasarela de Pago")
-        self.root.geometry("600x300")
-        self.root.configure(bg="white")
+def main(page: ft.Page):
+    page.title = "Pasarela de Pago"
+    page.bgcolor = "white"
+    page.window_width = 650
+    page.window_height = 400
 
-        # Detalle pedido (L)
+    # --- LEFT PANEL: Detalles del pedido ---
+    detalles = [
+        ("Comercio:", "Tienda Online"),
+        ("Terminal:", "335255568-1"),
+        ("Pedido:", "00005189416"),
+        ("Fecha:", "DD/MM/AAAA 00:00"),
+        ("Descripción producto:", "Pedido 5189"),
+    ]
 
-        left_frame = tk.Frame(root, bg="#E6F2FF", padx=20, pady=20, relief="solid", borderwidth=1)
-        left_frame.pack(side="left", fill="both", expand=True)
+    left_panel = ft.Container(
+        content=ft.Column([
+            ft.Text("Importe:", size=16, weight=ft.FontWeight.BOLD, color="black"),
+            ft.Text("50,000 $", size=20, weight=ft.FontWeight.BOLD, color="blue"),
+            *[ft.Text(f"{k} {v}", size=12, color="black") for k, v in detalles]
+        ], spacing=5, alignment="start"),
+        bgcolor="#E6F2FF",
+        padding=15,
+        border=ft.border.all(1, "black"),
+        width=280
+    )
 
-        tk.Label(left_frame, text="Importe:", font=("Arial", 14, "bold"), bg="#E6F2FF").pack(anchor="w")
-        tk.Label(left_frame, text="50,000 $", font=("Arial", 18, "bold"), fg="blue", bg="#E6F2FF").pack(anchor="w", pady=5)
+    # --- RIGHT PANEL: Formulario de pago ---
+    num_tarjeta = ft.TextField(label="Nº Tarjeta", width=230)
+    expiracion = ft.TextField(label="Caducidad (MM/AA)", width=150)
+    cvv = ft.TextField(label="Cód. Seguridad", width=100, password=True)
 
-        detalles = [
-            ("Comercio:", "Tienda Online"),
-            ("Terminal:", "335255568-1"),
-            ("Pedido:", "00005189416"),
-            ("Fecha:", "DD/MM/AAAA 00:00"),
-            ("Descripción producto:", "Pedido 5189"),
-        ]
+    def cancelar_pago(e):
+        num_tarjeta.value = ""
+        expiracion.value = ""
+        cvv.value = ""
+        page.dialog = ft.AlertDialog(
+            title=ft.Text("Cancelado"),
+            content=ft.Text("El pago fue cancelado")
+        )
+        page.dialog.open = True
+        page.update()
 
-        for k, v in detalles:
-            tk.Label(left_frame, text=f"{k} {v}", font=("Arial", 10), bg="#E6F2FF").pack(anchor="w", pady=2)
-
-        # Formulario pago (R)
-        # La mayoria de este codigo es interfaz
-
-        right_frame = tk.Frame(root, bg="white", padx=20, pady=20, relief="solid", borderwidth=1)
-        right_frame.pack(side="right", fill="both", expand=True)
-
-        tk.Label(right_frame, text="PAGAR CON TARJETA", font=("Arial", 12, "bold"), bg="white").pack(anchor="w", pady=5)
-
-        # Nº Tarjeta
-        tk.Label(right_frame, text="Nº Tarjeta:", bg="white").pack(anchor="w")
-        self.num_tarjeta = tk.Entry(right_frame, width=25, font=("Arial", 12))
-        self.num_tarjeta.pack(anchor="w", pady=5)
-
-        # Caducidad
-        tk.Label(right_frame, text="Caducidad (MM/AA):", bg="white").pack(anchor="w")
-        self.expiracion = tk.Entry(right_frame, width=10, font=("Arial", 12))
-        self.expiracion.pack(anchor="w", pady=5)
-
-        # Código Seguridad
-        tk.Label(right_frame, text="Cód. Seguridad:", bg="white").pack(anchor="w")
-        self.cvv = tk.Entry(right_frame, width=5, font=("Arial", 12), show="*")
-        self.cvv.pack(anchor="w", pady=5)
-
-        # Botones
-        button_frame = tk.Frame(right_frame, bg="white")
-        button_frame.pack(pady=15)
-
-        tk.Button(button_frame, text="CANCELAR", bg="gray", fg="white",
-                  command=self.cancelar_pago, width=10).pack(side="left", padx=5)
-
-        tk.Button(button_frame, text="PAGAR", bg="blue", fg="white",
-                  command=self.completar_pago, width=10).pack(side="left", padx=5)
-
-    # Botones
-
-    def cancelar_pago(self):
-        self.num_tarjeta.delete(0, tk.END)
-        self.expiracion.delete(0, tk.END)
-        self.cvv.delete(0, tk.END)
-        messagebox.showinfo("Cancelado", "El pago fue cancelado")
-
-    def completar_pago(self):
-        card = self.num_tarjeta.get()
-        expiracion = self.expiracion.get()
-        cvv = self.cvv.get()
-
-        if not card or not expiracion or not cvv:
-            messagebox.showwarning("Error", "Por favor, completa todos los campos") #Error, falta informacion
+    def completar_pago(e):
+        if not num_tarjeta.value or not expiracion.value or not cvv.value:
+            page.dialog = ft.AlertDialog(
+                title=ft.Text("Error"),
+                content=ft.Text("Por favor, completa todos los campos")
+            )
         else:
-            messagebox.showinfo("Pago Exitoso", f"Pago realizado con tarjeta terminada en {card[-4:]}")
+            page.dialog = ft.AlertDialog(
+                title=ft.Text("Pago Exitoso"),
+                content=ft.Text(f"Pago realizado con tarjeta terminada en {num_tarjeta.value[-4:]}")
+            )
+        page.dialog.open = True
+        page.update()
+
+    right_panel = ft.Container(
+        content=ft.Column([
+            ft.Text("PAGAR CON TARJETA", size=14, weight=ft.FontWeight.BOLD, color="black"),
+            num_tarjeta,
+            expiracion,
+            cvv,
+            ft.Row([
+                ft.ElevatedButton("CANCELAR", bgcolor="gray", color="white", on_click=cancelar_pago),
+                ft.ElevatedButton("PAGAR", bgcolor="blue", color="white", on_click=completar_pago),
+            ], spacing=10)
+        ], spacing=10, alignment="start"),
+        bgcolor="white",
+        padding=15,
+        border=ft.border.all(1, "black"),
+        width=280
+    )
+
+    # --- LAYOUT with centered content and spacing ---
+    page.add(
+        ft.Row(
+            [left_panel, right_panel],
+            alignment="center",   # centers the row in window
+            spacing=20,           # adds space between the two panels
+        )
+    )
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = PaymentGatewayApp(root)
-    root.mainloop()
+    ft.app(target=main)

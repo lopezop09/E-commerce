@@ -1,7 +1,7 @@
 import flet as ft
 
-class ProductCard(ft.Container):
-    def __init__(self, name, price, old_price=None, discount=None):
+class TarjetaProducto(ft.Container):
+    def __init__(self, nombre, precio, precio_anterior=None, descuento=None):
         super().__init__()
         self.content = ft.Column(
             [
@@ -14,20 +14,27 @@ class ProductCard(ft.Container):
                     border=ft.border.all(1, "black"),
                 ),
                 # Nombre del producto
-                ft.Text(name, weight="bold", color="black"),
+                ft.Text(nombre, weight="bold", color="black"),
                 # Precio y descuento
                 ft.Row(
                     [
-                        ft.Text(f"${price:,}", weight="bold", color="black"),
+                        # Precio principal
                         ft.Text(
-                            f"${old_price:,}" if old_price else "",
+                            f"COP ${precio:,.0f}".replace(",", "."),
+                            weight="bold",
+                            color="black"
+                        ),
+                        # Precio anterior (si existe)
+                        ft.Text(
+                            f"COP ${precio_anterior:,.0f}".replace(",", ".") if precio_anterior else "",
                             color="gray",
                             weight="w400",
                             size=12,
                             style=ft.TextThemeStyle.BODY_SMALL,
                         ),
+                        # Descuento (si existe)
                         ft.Text(
-                            f"-{discount}%" if discount else "",
+                            f"-{descuento}%" if descuento else "",
                             color="red",
                             size=12,
                             weight="bold",
@@ -40,8 +47,8 @@ class ProductCard(ft.Container):
         )
         self.padding = 10
         self.border = ft.border.all(0.5, "lightgray")
-        self.border_radius = 10
-        self.width = 180
+        self.border_radius = 15
+        self.width = 200
 
 
 def main(page: ft.Page):
@@ -51,48 +58,47 @@ def main(page: ft.Page):
     page.bgcolor = "white"
 
     # Título principal
-    header = ft.Text("E-commerce", size=30, weight="bold", color="black")
+    encabezado = ft.Text("E-commerce", size=30, weight="bold", color="black")
 
     # Sección nuevos productos
-    nuevos_title = ft.Text("NUEVOS PRODUCTOS", size=20, weight="bold", color="black")
+    nuevos_titulo = ft.Text("NUEVOS PRODUCTOS", size=20, weight="bold", color="black")
     nuevos_row = ft.Row(
         [
-            ProductCard("Producto 1", 120),
-            ProductCard("Producto 2", 240, 260, 20),
-            ProductCard("Producto 3", 180),
-            ProductCard("Producto 4", 130, 160, 20),
+            TarjetaProducto("Producto 1", 120000),
+            TarjetaProducto("Producto 2", 240000, 260000, 20),
+            TarjetaProducto("Producto 3", 180000),
+            TarjetaProducto("Producto 4", 130000, 160000, 20),
         ],
         alignment="spaceAround",
         wrap=True,
     )
-    expand_nuevos = ft.ElevatedButton("Expandir")
+    expandir_nuevos = ft.ElevatedButton("Expandir")
 
     # Sección más vendidos
-    mas_title = ft.Text("MÁS VENDIDOS", size=20, weight="bold", color="black")
+    mas_titulo = ft.Text("MÁS VENDIDOS", size=20, weight="bold", color="black")
     mas_row = ft.Row(
         [
-            ProductCard("Producto A", 212, 232, 20),
-            ProductCard("Producto B", 145),
-            ProductCard("Producto C", 80),
-            ProductCard("Producto D", 210),
+            TarjetaProducto("Producto A", 212000, 232000, 20),
+            TarjetaProducto("Producto B", 145000),
+            TarjetaProducto("Producto C", 80000),
+            TarjetaProducto("Producto D", 210000),
         ],
         alignment="spaceAround",
         wrap=True,
     )
-    expand_mas = ft.ElevatedButton("Expandir")
+    expandir_mas = ft.ElevatedButton("Expandir")
 
     # Layout final
     page.add(
-        header,
+        encabezado,
         ft.Divider(),
-        nuevos_title,
+        nuevos_titulo,
         nuevos_row,
-        expand_nuevos,
+        expandir_nuevos,
         ft.Divider(),
-        mas_title,
+        mas_titulo,
         mas_row,
-        expand_mas,
+        expandir_mas,
     )
-
 
 ft.app(target=main)

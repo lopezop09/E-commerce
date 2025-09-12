@@ -6,16 +6,16 @@ def main(page: ft.Page):
     page.window_width = 650
     page.window_height = 400
 
-    # --- LEFT PANEL: Detalles del pedido ---
+    # --- PANEL IZQUIERDO: Detalles del pedido ---
     detalles = [
-        ("Comercio:", "Tienda Online"),
-        ("Terminal:", "335255568-1"),
-        ("Pedido:", "00005189416"),
-        ("Fecha:", "DD/MM/AAAA 00:00"),
-        ("Descripción producto:", "Pedido 5189"),
+        ("ID:", "0001"),
+        ("Monto:", "50,000 $"),
+        ("Fecha:", "11/09/2025"),
+        ("Método de pago:", "Tarjeta"),
+        ("Estado del pago:", "Pendiente"),
     ]
 
-    left_panel = ft.Container(
+    panel_izquierdo = ft.Container(
         content=ft.Column([
             ft.Text("Importe:", size=16, weight=ft.FontWeight.BOLD, color="black"),
             ft.Text("50,000 $", size=20, weight=ft.FontWeight.BOLD, color="blue"),
@@ -27,7 +27,7 @@ def main(page: ft.Page):
         width=280
     )
 
-    # --- RIGHT PANEL: Formulario de pago ---
+    # --- PANEL DERECHO: Formulario de pago ---
     num_tarjeta = ft.TextField(label="Nº Tarjeta", width=230)
     expiracion = ft.TextField(label="Caducidad (MM/AA)", width=150)
     cvv = ft.TextField(label="Cód. Seguridad", width=100, password=True)
@@ -51,13 +51,13 @@ def main(page: ft.Page):
             )
         else:
             page.dialog = ft.AlertDialog(
-                title=ft.Text("Pago Exitoso"),
+                title=ft.Text("Pago exitoso"),
                 content=ft.Text(f"Pago realizado con tarjeta terminada en {num_tarjeta.value[-4:]}")
             )
         page.dialog.open = True
         page.update()
 
-    right_panel = ft.Container(
+    panel_derecho = ft.Container(
         content=ft.Column([
             ft.Text("PAGAR CON TARJETA", size=14, weight=ft.FontWeight.BOLD, color="black"),
             num_tarjeta,
@@ -74,15 +74,14 @@ def main(page: ft.Page):
         width=280
     )
 
-    # --- LAYOUT with centered content and spacing ---
+    # --- DISEÑO: contenido centrado con espacio entre paneles ---
     page.add(
         ft.Row(
-            [left_panel, right_panel],
-            alignment="center",   # centers the row in window
-            spacing=20,           # adds space between the two panels
+            [panel_izquierdo, panel_derecho],
+            alignment="center",   # centra la fila en la ventana
+            spacing=20,           # espacio entre los dos paneles
         )
     )
-
 
 if __name__ == "__main__":
     ft.app(target=main)

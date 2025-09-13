@@ -1,0 +1,127 @@
+{
+  "productos": [
+    {
+      "id": 1,
+      "nombre": "Procesador Intel Core i9-13900K",
+      "precio": 2323000,
+      "categoria": "Procesadores",
+      "marca": "Intel",
+      "imagen": "",
+      "destacado": true,
+      "descripcion": "Procesador de 24 núcleos y 32 hilos, frecuencia turbo de hasta 5.8 GHz"
+    },
+    {
+      "id": 2,
+      "nombre": "Tarjeta Gráfica NVIDIA RTX 4080",
+      "precio": 4670000,
+      "categoria": "Tarjetas Gráficas",
+      "marca": "NVIDIA",
+      "imagen": "",
+      "destacado": true,
+      "descripcion": "16GB GDDR6X, ray tracing y DLSS 3.0"
+    },
+    {
+      "id": 3,
+      "nombre": "SSD Samsung 980 Pro 1TB",
+      "precio": 743440,
+      "categoria": "Almacenamiento",
+      "marca": "Samsung",
+      "imagen": "",
+      "destacado": true,
+      "descripcion": "Velocidades de lectura hasta 7000 MB/s, PCIe 4.0 NVMe"
+    },
+    {
+      "id": 4,
+      "nombre": "Memoria RAM Corsair Vengeance 32GB",
+      "precio": 505000,
+      "categoria": "Memoria RAM",
+      "marca": "Corsair",
+      "imagen": "",
+      "destacado": false,
+      "descripcion": "DDR5 5600MHz, CL36, RGB"
+    },
+    {
+      "id": 5,
+      "nombre": "Placa Base ASUS ROG Strix Z790-E",
+      "precio": 2530000,
+      "categoria": "Placas Base",
+      "marca": "ASUS",
+      "imagen": "",
+      "destacado": true,
+      "descripcion": "Socket LGA1700, PCIe 5.0, WiFi 6E"
+    },
+    {
+      "id": 6,
+      "nombre": "Fuente de Alimentación Seasonic 850W",
+      "precio": 600000,
+      "categoria": "Fuentes de Poder",
+      "marca": "Seasonic",
+      "imagen": "",
+      "destacado": false,
+      "descripcion": "80 Plus Gold, modular, certificación completa"
+    },
+    {
+      "id": 7,
+      "nombre": "Monitor Gaming ASUS 27\" 144Hz",
+      "precio": 1250000,
+      "categoria": "Monitores",
+      "marca": "ASUS",
+      "imagen": "",
+      "destacado": false,
+      "descripcion": "QHD, 1ms, FreeSync y G-Sync compatible"
+    },
+    {
+      "id": 8,
+      "nombre": "Teclado Mecánico Razer BlackWidow",
+      "precio": 600000,
+      "categoria": "Periféricos",
+      "marca": "Razer",
+      "imagen": "",
+      "destacado": false,
+      "descripcion": "Switches mecánicos Razer Green, RGB Chroma"
+    },
+    {
+      "id": 9,
+      "nombre": "Procesador AMD Ryzen 9 7950X",
+      "precio": 2450000,
+      "categoria": "Procesadores",
+      "marca": "AMD",
+      "imagen": "",
+      "destacado": true,
+      "descripcion": "16 núcleos, 32 hilos, frecuencia hasta 5.7 GHz"
+    },
+    {
+      "id": 10,
+      "nombre": "Tarjeta Gráfica AMD Radeon RX 7900 XT",
+      "precio": 4700000,
+      "categoria": "Tarjetas Gráficas",
+      "marca": "AMD",
+      "imagen": "",
+      "destacado": false,
+      "descripcion": "20GB GDDR6, arquitectura RDNA 3"
+    }
+  ],
+  "categorias": [
+    "Procesadores",
+    "Tarjetas Gráficas",
+    "Memoria RAM",
+    "Placas Base",
+    "Almacenamiento",
+    "Fuentes de Poder",
+    "Monitores",
+    "Periféricos",
+    "Refrigeración"
+  ],
+  "marcas": [
+    "Intel",
+    "AMD",
+    "NVIDIA",
+    "ASUS",
+    "MSI",
+    "Gigabyte",
+    "Corsair",
+    "Samsung",
+    "Seasonic",
+    "Razer"
+  ]
+}

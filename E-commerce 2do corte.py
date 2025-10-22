@@ -2,9 +2,14 @@ import flet as ft
 import re
 import os
 import uuid
+import webbrowser
+import mercadopago
 from datetime import datetime
 import sqlite3
 from contextlib import contextmanager
+
+#Token de acceso para mercado pago
+ACCESS_TOKEN = "APP_USR-1864674603848840-102206-3ba17bea7a073761dabe4a32e7fafa87-2939897316"
 
 # --- BASE DE DATOS SQLite (CON NUEVAS TABLAS MARCA Y CATEGORIA) ---
 class Database:
@@ -1617,7 +1622,8 @@ class PasarelaPago:
             print(f"     - {producto['nombre']} x{producto['cantidad']}")
     
     def completar_pago(self, e):
-        """Manejar el proceso de pago completo - VERSIÓN CORREGIDA"""
+        """Procesar el pago completo con integración a Mercado Pago"""
+        
         print("DEBUG: Botón PAGAR presionado")
         
         # Validar campos
@@ -1627,37 +1633,73 @@ class PasarelaPago:
         
         print("DEBUG: Validación exitosa")
         
-        # ✅ USAR FECHA EN FORMATO CORRECTO PARA BD
+        # ✅ Fecha con formato correcto para SQLite
         fecha_bd = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         # Crear registro del pedido
         pedido = {
             'id': self.order_id,
-            'fecha': fecha_bd,  # ✅ Formato correcto para SQLite
+            'fecha': fecha_bd,
             'cliente': self.user['email'],
             'productos': self.carrito,
-            'total': float(self.total),  # ✅ Asegurar tipo float
-            'estado': 'Completado',
-            'metodo_pago': 'Tarjeta',
+            'total': float(self.total),
+            'estado': 'Pendiente de pago',
+            'metodo_pago': 'Mercado Pago',
             'tarjeta_ultimos_digitos': self.num_tarjeta.value[-4:] if self.num_tarjeta.value else ''
         }
         
-        # 🔍 DIAGNÓSTICO MEJORADO
+        # 🔍 Diagnóstico
         self.mostrar_diagnostico_pedido(pedido)
         
-        # Guardar pedido
+        # --- 🟦 INTEGRACIÓN CON MERCADO PAGO ---
         try:
+            print("DEBUG: Iniciando integración con Mercado Pago...")
+            sdk = mercadopago.SDK(ACCESS_TOKEN)
+
+            datos_preferencia = {
+                "items": [
+                    {
+                        "title": "Compra en la tienda",
+                        "quantity": 1,
+                        "currency_id": "COP",
+                        "unit_price": float(self.total)
+                    }
+                ],
+                "payer": {"email": self.user["email"]},
+                "back_urls": {
+                    "success": "https://www.exito.com/success",
+                    "failure": "https://www.exito.com/failure",
+                    "pending": "https://www.exito.com/pending"
+                },
+                "auto_return": "approved"
+            }
+
+            respuesta_preferencia = sdk.preference().create(datos_preferencia)
+            url_pago = respuesta_preferencia["response"]["init_point"]
+
+            print(f"DEBUG: Preferencia creada con éxito → {url_pago}")
+
+            # Abrir el pago dentro de la app (en una vista web)
+            self.mostrar_pagina_pago(url_pago)
+
+            # Guardar el pedido en la base de datos como "pendiente"
             self.db.guardar_pedido(pedido)
-            print("DEBUG: Pedido guardado exitosamente")
-            
-            # Mostrar confirmación
-            self.mostrar_confirmacion()
-            
+            print("DEBUG: Pedido guardado como pendiente de pago")
+
         except Exception as error:
-            print(f"DEBUG: Error al guardar pedido: {error}")
-            self.mostrar_error(f"Error al procesar el pago: {str(error)}")
-            return
+            print(f"DEBUG: Error en la integración con Mercado Pago: {error}")
+            self.mostrar_error(f"Error al conectar con Mercado Pago: {str(error)}")
+            return     
     
+    def mostrar_pagina_pago(self, url):
+        """Abrir el pago de Mercado Pago en el navegador predeterminado."""
+        print(f"🛒 Abriendo página de pago en navegador: {url}")
+        webbrowser.open(url)
+
+        # Mensaje informativo dentro de la app
+        self.mostrar_mensaje("Se abrió la página de pago en tu navegador. Completa la transacción y vuelve a la app.")
+
+
     def validar_campos(self):
         """Validar los campos del formulario de pago"""
         print("DEBUG: Validando campos de pago")

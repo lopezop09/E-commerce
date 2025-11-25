@@ -149,4 +149,9 @@ class VistaRegistroAdmin:
         self.pagina.update()
 
     def limpiar_campos(self):
-        self.campo_nombre
+        self.campo_nombre.value = ""
+        self.campo_email.value = ""
+        self.campo_password.value = ""
+        self.campo_confirmar_password.value = ""
+        self.mensaje.value = ""
+        self.pagina.update()

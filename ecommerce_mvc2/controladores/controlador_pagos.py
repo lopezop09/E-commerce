@@ -5,7 +5,7 @@ from datetime import datetime
 from modelos import BaseDatos, Pedido
 from vistas import VistaPasarelaPago
 
-# Token de acceso para MercadoPago
+# Token de acceso para MercadoPago (debería estar en variables de entorno)
 ACCESS_TOKEN = "APP_USR-1864674603848840-102206-3ba17bea7a073761dabe4a32e7fafa87-2939897316"
 
 class ControladorPagos:
@@ -15,6 +15,9 @@ class ControladorPagos:
         self.base_datos = BaseDatos()
         self.id_pedido_actual = None
         self.fecha_actual = None
+        self.usuario_actual = None
+        self.carrito_actual = None
+        self.total_actual = None
 
     def mostrar_pasarela(self, usuario, carrito, total):
         self.id_pedido_actual = str(uuid.uuid4())[:8]
@@ -39,6 +42,11 @@ class ControladorPagos:
 
     def procesar_pago_mercadopago(self):
         try:
+            # Validar que haya productos en el carrito
+            if not self.carrito_actual:
+                self.vista_pago.mostrar_error("El carrito está vacío")
+                return
+
             # 1. Guardar pedido en base de datos
             pedido = Pedido(
                 id=self.id_pedido_actual,

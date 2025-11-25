@@ -4,6 +4,8 @@ from .controlador_productos import ControladorProductos
 from .controlador_carrito import ControladorCarrito
 from .controlador_pagos import ControladorPagos
 from .controlador_admin import ControladorAdmin
+from .controlador_vendedor import ControladorVendedor
+from .controlador_devoluciones import ControladorDevolucionesSimple
 
 __all__ = [
     'ControladorAuth',
@@ -11,5 +13,7 @@ __all__ = [
     'ControladorProductos',
     'ControladorCarrito',
     'ControladorPagos',
-    'ControladorAdmin'
+    'ControladorAdmin',
+    'ControladorVendedor',
+    'ControladorDevolucionesSimple'
 ]

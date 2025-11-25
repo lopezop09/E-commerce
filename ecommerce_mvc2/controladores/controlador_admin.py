@@ -1,15 +1,18 @@
 import re
-from modelos import BaseDatos
-from vistas import VistaPanelAdministrador
+import flet as ft
 
 class ControladorAdmin:
     def __init__(self, pagina, controlador_principal):
         self.pagina = pagina
         self.controlador_principal = controlador_principal
+        # Importación diferida
+        from modelos.base_de_datos import BaseDatos
         self.base_datos = BaseDatos()
         self.vista_admin = None
 
     def mostrar_panel(self, usuario):
+        # Importación diferida
+        from vistas.vista_administrador import VistaPanelAdministrador
         self.vista_admin = VistaPanelAdministrador(self.pagina, usuario, self)
         self.vista_admin.mostrar()
 
@@ -38,6 +41,8 @@ Registro: {usuario.get('fecha_registro', 'N/A')}
         if estado_bloqueo['bloqueado']:
             mensaje_estado += f"\nBloqueado desde: {estado_bloqueo['fecha_operacion']}"
             mensaje_estado += f"\nBloqueado por: {estado_bloqueo['realizado_por']}"
+            if estado_bloqueo['motivo']:
+                mensaje_estado += f"\nMotivo: {estado_bloqueo['motivo']}"
         
         self.vista_admin.mostrar_mensaje_gestion_usuarios(mensaje_estado, "blue")
 
@@ -117,27 +122,57 @@ Registro: {usuario.get('fecha_registro', 'N/A')}
             self.vista_admin.mostrar_mensaje_gestion_usuarios("No puedes eliminar tu propia cuenta", "red")
             return
         
-        # En una implementación real, aquí iría un diálogo de confirmación
-        try:
-            self.base_datos.eliminar_usuario(email)
-            self.vista_admin.mostrar_mensaje_gestion_usuarios(f"🗑️ Cuenta de {email} eliminada permanentemente", "red")
-        except Exception as error:
-            self.vista_admin.mostrar_mensaje_gestion_usuarios(f"Error al eliminar: {str(error)}", "red")
+        # Diálogo de confirmación
+        def confirmar_eliminacion(e):
+            try:
+                self.base_datos.eliminar_usuario(email)
+                self.vista_admin.mostrar_mensaje_gestion_usuarios(f"🗑️ Cuenta de {email} eliminada permanentemente", "red")
+                dialog.open = False
+                self.pagina.update()
+            except Exception as error:
+                self.vista_admin.mostrar_mensaje_gestion_usuarios(f"Error al eliminar: {str(error)}", "red")
+        
+        def cancelar_eliminacion(e):
+            dialog.open = False
+            self.pagina.update()
+        
+        dialog = ft.AlertDialog(
+            title=ft.Text("Confirmar Eliminación"),
+            content=ft.Text(f"¿Estás seguro de que quieres eliminar permanentemente al usuario {email}?\nEsta acción no se puede deshacer."),
+            actions=[
+                ft.TextButton("Cancelar", on_click=cancelar_eliminacion),
+                ft.TextButton("Eliminar", on_click=confirmar_eliminacion, style=ft.ButtonStyle(color=ft.Colors.RED)),
+            ],
+        )
+        
+        self.pagina.dialog = dialog
+        dialog.open = True
+        self.pagina.update()
 
     def gestionar_marcas(self, e):
-        self.vista_admin.mostrar_mensaje_global("🚧 Gestión de marcas en desarrollo")
+        from vistas.vista_gestion_marcas import VistaGestionMarcas
+        vista_marcas = VistaGestionMarcas(self.pagina, self)
+        vista_marcas.mostrar()
 
     def gestionar_categorias(self, e):
-        self.vista_admin.mostrar_mensaje_global("🚧 Gestión de categorías en desarrollo")
+        from vistas.vista_gestion_categorias import VistaGestionCategorias
+        vista_categorias = VistaGestionCategorias(self.pagina, self)
+        vista_categorias.mostrar()
 
     def ver_inventario_completo(self, e):
-        self.vista_admin.mostrar_mensaje_global("🚧 Inventario completo en desarrollo")
+        from vistas.vista_inventario import VistaInventario
+        vista_inventario = VistaInventario(self.pagina, self, "completo")
+        vista_inventario.mostrar()
 
     def ver_stock_bajo(self, e):
-        self.vista_admin.mostrar_mensaje_global("🚧 Stock bajo en desarrollo")
+        from vistas.vista_inventario import VistaInventario
+        vista_inventario = VistaInventario(self.pagina, self, "bajo")
+        vista_inventario.mostrar()
 
     def actualizar_stock_producto(self, e):
-        self.vista_admin.mostrar_mensaje_global("🚧 Actualizar stock en desarrollo")
+        from vistas.vista_inventario import VistaInventario
+        vista_inventario = VistaInventario(self.pagina, self, "actualizar")
+        vista_inventario.mostrar()
 
     def validar_email(self, email):
         if not email or not email.strip():

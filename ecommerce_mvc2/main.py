@@ -1,6 +1,4 @@
 import flet as ft
-from controladores.controlador_auth import ControladorAuth
-from controladores.controlador_principal import ControladorPrincipal
 
 def main(pagina: ft.Page):
     # Configuración de la ventana
@@ -12,10 +10,14 @@ def main(pagina: ft.Page):
     
     print("🚀 DEBUG: Aplicación iniciada")
     
+    # Importación directa
+    from controladores.controlador_auth import ControladorAuth
+    from controladores.controlador_principal import ControladorPrincipal
+    
     # Inicializar controlador principal primero
     controlador_principal = ControladorPrincipal(pagina)
     
-    # Inicializar controlador de autenticación y configurar la relación
+    # Inicializar controlador de autenticación
     controlador_auth = ControladorAuth(pagina)
     controlador_auth.set_controlador_principal(controlador_principal)
     

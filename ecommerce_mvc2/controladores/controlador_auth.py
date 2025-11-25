@@ -1,14 +1,21 @@
 import re
-from modelos import BaseDatos
-from vistas import VistaLogin, VistaRegistro, VistaRegistroAdmin
+import flet as ft
 
 class ControladorAuth:
     def __init__(self, pagina):
         self.pagina = pagina
+        # Importación absoluta para evitar problemas
+        from modelos.base_de_datos import BaseDatos
         self.base_datos = BaseDatos()
+        
+        # Importación diferida de vistas
+        from vistas.vista_login import VistaLogin
+        from vistas.vista_registro import VistaRegistro, VistaRegistroAdmin
+        
         self.vista_login = VistaLogin(pagina, self)
         self.vista_registro = VistaRegistro(pagina, self)
         self.vista_registro_admin = VistaRegistroAdmin(pagina, self)
+        
         self.controlador_principal = None
 
     def set_controlador_principal(self, controlador_principal):
@@ -49,9 +56,14 @@ class ControladorAuth:
             return
 
         # Login exitoso
+        print(f"✅ DEBUG: Login exitoso para {email}")
         self.vista_login.limpiar_campos()
+        
         if self.controlador_principal:
+            print(f"🔍 DEBUG: Llamando a mostrar_principal desde controlador_auth")
             self.controlador_principal.mostrar_principal(usuario)
+        else:
+            print("❌ ERROR: controlador_principal no está configurado")
 
     def registrar_usuario(self, datos_usuario):
         error = self.validar_registro(datos_usuario)

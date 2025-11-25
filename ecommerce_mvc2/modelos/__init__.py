@@ -1,3 +1,4 @@
+# Importaciones directas y simples
 from .base_de_datos import BaseDatos
 from .usuario import Usuario
 from .producto import Producto, SujetoProducto, Observador, DecoradorProducto, DecoradorDescuento, DecoradorEnvio

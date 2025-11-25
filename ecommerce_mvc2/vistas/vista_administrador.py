@@ -72,7 +72,7 @@ class VistaPanelAdministrador:
             elevation=5
         )
 
-        # Otras secciones (simplificadas para el ejemplo)
+        # Otras secciones
         seccion_marcas_categorias = self.crear_seccion_general("Marcas y Categorías", [
             ("🏷️ Gestionar Marcas", "Administrar marcas de productos", self.controlador.gestionar_marcas),
             ("📂 Gestionar Categorías", "Administrar categorías de productos", self.controlador.gestionar_categorias)
@@ -84,8 +84,8 @@ class VistaPanelAdministrador:
             ("✏️ Actualizar Stock", "Modificar cantidades de productos", self.controlador.actualizar_stock_producto)
         ])
 
-        # Layout principal
-        self.contenido = ft.Column(
+        # Contenido principal con scroll
+        contenido_principal = ft.Column(
             controls=[
                 barra_superior,
                 ft.Divider(),
@@ -110,7 +110,14 @@ class VistaPanelAdministrador:
             ],
             spacing=15,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            scroll=ft.ScrollMode.AUTO
+            scroll=ft.ScrollMode.ADAPTIVE  # Scroll vertical
+        )
+
+        # Contenedor principal expandido
+        self.contenido = ft.Container(
+            content=contenido_principal,
+            expand=True,  # Expande para llenar la página
+            padding=20
         )
 
     def crear_seccion_general(self, titulo, botones):
@@ -157,6 +164,7 @@ class VistaPanelAdministrador:
 
     def mostrar(self):
         self.pagina.clean()
+        # Agregar el contenedor expandido a la página
         self.pagina.add(self.contenido)
 
     def volver(self, e):

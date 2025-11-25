@@ -9,18 +9,27 @@ class VistaPrincipal:
         self.crear_controles()
 
     def crear_controles(self):
-        self.campo_busqueda = ft.TextField(
-            label="Buscar productos...",
-            width=900,
-            on_submit=self.buscar_productos,
-            suffix=ft.IconButton(ft.Icons.SEARCH, on_click=self.buscar_productos)
-        )
-
+        # Crear todos los botones
         self.boton_carrito = ft.ElevatedButton(
             "🛒 Carrito (0)", 
             on_click=self.abrir_carrito
         )
-
+        
+        self.boton_cerrar_sesion = ft.ElevatedButton(
+            "⬅️ Cerrar Sesión", 
+            on_click=self.cerrar_sesion
+        )
+        
+        # Botón de devolución - SIEMPRE VISIBLE PARA PRUEBAS
+        self.boton_devolucion = ft.ElevatedButton(
+            "Devolucion de producto",
+            on_click=self.abrir_devolucion_rapida,
+            style=ft.ButtonStyle(
+                bgcolor=ft.Colors.PURPLE,
+                color=ft.Colors.WHITE
+            )
+        )
+        
         self.boton_panel_admin = ft.ElevatedButton(
             "Panel Administrador",
             on_click=self.abrir_panel_admin,
@@ -30,30 +39,59 @@ class VistaPrincipal:
             ),
             visible=False
         )
-
-        self.boton_cerrar_sesion = ft.ElevatedButton("⬅️ Cerrar Sesión", on_click=self.cerrar_sesion)
+        
+        self.boton_panel_vendedor = ft.ElevatedButton(
+            "Panel Vendedor",
+            on_click=self.abrir_panel_vendedor,
+            style=ft.ButtonStyle(
+                bgcolor=ft.Colors.GREEN,
+                color=ft.Colors.WHITE
+            ),
+            visible=False
+        )
+        
+        self.campo_busqueda = ft.TextField(
+            label="Buscar productos...",
+            width=600,
+            on_submit=self.buscar_productos,
+            suffix=ft.IconButton(ft.Icons.SEARCH, on_click=self.buscar_productos)
+        )
 
     def mostrar(self, usuario, productos, carrito=None):
+        print(f"🎯 DEBUG: Mostrando vista principal para {usuario['email']} - Tipo: {usuario['tipo']}")
+        
         if carrito:
             self.carrito = carrito
         
         self.actualizar_contador_carrito()
         
-        # Configurar visibilidad del botón de admin
+        # FORZAR VISIBILIDAD PARA PRUEBAS - QUITAR LUEGO
+        self.boton_devolucion.visible = True  # SIEMPRE VISIBLE
         self.boton_panel_admin.visible = (usuario['tipo'] == 'administrador')
-
-        # Crear barra superior
+        self.boton_panel_vendedor.visible = (usuario['tipo'] == 'vendedor')
+        
+        # Barra superior
         botones_superiores = [
             self.boton_cerrar_sesion,
             ft.Container(width=20),
             self.campo_busqueda,
             ft.Container(width=20),
-            self.boton_carrito
+            self.boton_carrito,
+            ft.Container(width=20),
+            self.boton_devolucion,  # SIEMPRE VISIBLE
         ]
-
+        
+        # Agregar botones específicos según tipo de usuario
         if usuario['tipo'] == 'administrador':
-            botones_superiores.append(ft.Container(width=20))
-            botones_superiores.append(self.boton_panel_admin)
+            botones_superiores.extend([
+                ft.Container(width=20),
+                self.boton_panel_admin
+            ])
+        elif usuario['tipo'] == 'vendedor':
+            botones_superiores.extend([
+                ft.Container(width=20),
+                self.boton_panel_vendedor
+            ])
 
         barra_superior = ft.Row(
             controls=botones_superiores,
@@ -72,24 +110,48 @@ class VistaPrincipal:
         # Todos los productos
         lista_todos = [self.crear_tarjeta_producto(p) for p in productos]
 
-        self.contenedor_principal = ft.Column(
-            controls=[
-                barra_superior,
-                texto_bienvenida,
-                texto_tipo_usuario,
-                ft.Divider(),
-                ft.Text("Productos Destacados", size=20, weight="bold"),
-                ft.Row(lista_destacados, wrap=True, spacing=10, alignment=ft.MainAxisAlignment.CENTER),
-                ft.Divider(),
-                ft.Text("Todos los Productos", size=20, weight="bold"),
-                ft.Row(lista_todos, wrap=True, spacing=10, alignment=ft.MainAxisAlignment.CENTER)
-            ],
-            spacing=20,
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER
+        # Contenedor principal con scroll
+        self.contenedor_principal = ft.Container(
+            content=ft.Column(
+                controls=[
+                    barra_superior,
+                    texto_bienvenida,
+                    texto_tipo_usuario,
+                    ft.Divider(),
+                    ft.Text("Productos Destacados", size=20, weight="bold"),
+                    ft.Container(
+                        content=ft.Row(lista_destacados, wrap=True, scroll=ft.ScrollMode.AUTO),
+                        height=250
+                    ),
+                    ft.Divider(),
+                    ft.Text("Todos los Productos", size=20, weight="bold"),
+                    ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                ft.Row(lista_todos, wrap=True, spacing=10, alignment=ft.MainAxisAlignment.CENTER)
+                            ],
+                            scroll=ft.ScrollMode.ADAPTIVE
+                        ),
+                        expand=True
+                    )
+                ],
+                spacing=20,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                scroll=ft.ScrollMode.ADAPTIVE
+            ),
+            expand=True
         )
 
         self.pagina.clean()
-        self.pagina.add(self.contenedor_principal)
+        self.pagina.add(
+            ft.Container(
+                content=self.contenedor_principal,
+                expand=True,
+                padding=20
+            )
+        )
+        
+        print("✅ DEBUG: Vista principal mostrada correctamente")
 
     def crear_tarjeta_producto(self, producto_data):
         producto = Producto(
@@ -142,6 +204,13 @@ class VistaPrincipal:
 
     def abrir_panel_admin(self, e):
         self.controlador.mostrar_panel_administrador()
+
+    def abrir_panel_vendedor(self, e):
+        self.controlador.mostrar_panel_vendedor()
+
+    def abrir_devolucion_rapida(self, e):
+        print("🔍 DEBUG: Abriendo devolución rápida...")
+        self.controlador.mostrar_devolucion_rapida()
 
     def cerrar_sesion(self, e):
         self.controlador.cerrar_sesion()

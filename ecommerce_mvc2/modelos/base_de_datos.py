@@ -47,7 +47,7 @@ class BaseDatos:
             yield conn
             if conn:
                 conn.commit()
-                print("✅ DEBUG: Transacción commitada")
+                print("✅ DEBUG: Transacción realizada")
         except Exception as e:
             if conn:
                 conn.rollback()
